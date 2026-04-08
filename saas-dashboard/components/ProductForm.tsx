@@ -67,6 +67,7 @@ export default function ProductForm({ onCreated }: { onCreated: () => void }) {
       <button
         onClick={handleSubmit}
         className="bg-blue-500 text-white p-2"
+        disabled={!name || !price}
       >
         Create
       </button>

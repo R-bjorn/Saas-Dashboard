@@ -1,5 +1,4 @@
-import { adminAuth } from "@/lib/firebaseAdmin";
-import { adminDb } from "@/lib/firebaseAdmin";
+import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 
 export async function verifyUser(req: Request) {
   const authHeader = req.headers.get("authorization");
@@ -9,10 +8,24 @@ export async function verifyUser(req: Request) {
   }
 
   const token = authHeader.split("Bearer ")[1];
-
   const decoded = await adminAuth.verifyIdToken(token);
 
-  const userDoc = await adminDb.collection("users").doc(decoded.uid).get();
+  const userRef = adminDb.collection("users").doc(decoded.uid);
+  const userDoc = await userRef.get();
+
+  // If user does not exist → create it
+  if (!userDoc.exists) {
+    await userRef.set({
+      role: "viewer",
+      email: decoded.email,
+      createdAt: new Date(),
+    });
+
+    return {
+      uid: decoded.uid,
+      role: "viewer",
+    };
+  }
 
   return {
     uid: decoded.uid,
@@ -21,7 +34,7 @@ export async function verifyUser(req: Request) {
 }
 
 export function requireRole(user: any, role: string) {
-  if (user.role !== role) {
+  if (!user || user.role !== role) {
     throw new Error("Forbidden");
   }
 }

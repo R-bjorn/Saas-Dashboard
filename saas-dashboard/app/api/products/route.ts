@@ -16,14 +16,17 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const user = await verifyUser(req);
-  requireRole(user, "admin");
+  try {
+    const user = await verifyUser(req);
+    requireRole(user, "admin");
 
-  const body = await req.json();
+    const body = await req.json();
+    const product = await createProductService(body);
 
-  const product = await createProductService(body);
-
-  return Response.json(product);
+    return Response.json(product);
+  } catch (err: any) {
+    return new Response(err.message, { status: 403 });
+  }
 }
 
 export async function PUT(req: Request) {
