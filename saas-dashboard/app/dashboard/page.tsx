@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Product } from "@/types/product";
+import ProductForm from "@/components/ProductForm";
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,6 +42,8 @@ export default function DashboardPage() {
           Revenue: ${totalRevenue}
         </div>
       </div>
+
+      <ProductForm onCreated={fetchProducts} />
 
       {/* Product Table */}
       <table className="w-full border">
