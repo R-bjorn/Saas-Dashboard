@@ -14,6 +14,9 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [search, setSearch] = useState("");
 
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+
   useEffect(() => {
     async function init() {
       await fetchUser();
@@ -22,6 +25,10 @@ export default function DashboardPage() {
     }
     init();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter, search]);
 
   const fetchProducts = async () => {
     const data = await apiFetch("/api/products");
@@ -39,6 +46,13 @@ export default function DashboardPage() {
   )
   .filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+
+  const paginatedProducts = filteredProducts.slice(
+    (page - 1) * pageSize,
+    page * pageSize
   );
 
   const handleDelete = async (id: string) => {
@@ -117,11 +131,57 @@ export default function DashboardPage() {
       </div>
 
       <ProductTable
-        products={filteredProducts}
+        products={paginatedProducts}
         role={role}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
+
+      {/* Pagination UI */}
+      <div className="mt-4 flex items-center gap-2">
+        {/* FIRST */}
+        <button
+          onClick={() => setPage(1)}
+          disabled={page === 1}
+          className="border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          First
+        </button>
+
+        {/* PREV */}
+        <button
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
+          disabled={page === 1}
+          className="border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Prev
+        </button>
+
+        {/* PAGE INFO */}
+        <span className="px-2">
+          Page {page} of {totalPages || 1}
+        </span>
+
+        {/* NEXT */}
+        <button
+          onClick={() =>
+            setPage((p) => Math.min(p + 1, totalPages))
+          }
+          disabled={page === totalPages || totalPages === 0}
+          className="border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+
+        {/* LAST */}
+        <button
+          onClick={() => setPage(totalPages)}
+          disabled={page === totalPages || totalPages === 0}
+          className="border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Last
+        </button>
+      </div>
     </div>
   );
 }
