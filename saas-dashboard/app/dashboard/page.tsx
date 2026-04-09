@@ -11,6 +11,8 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [role, setRole] = useState<"admin" | "viewer">("viewer");
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function init() {
@@ -30,6 +32,14 @@ export default function DashboardPage() {
     const user = await apiFetch("/api/me");
     setRole(user.role);
   };
+
+  const filteredProducts = products
+  .filter((p) =>
+    filter === "all" ? true : p.status === filter
+  )
+  .filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleDelete = async (id: string) => {
     await apiFetch("/api/products", {
@@ -67,8 +77,47 @@ export default function DashboardPage() {
         <ProductForm onCreated={fetchProducts} />
       )}
 
+      {/* Search Input Bar */}
+      <input
+        type="text"
+        placeholder="Search products..."
+        className="border px-3 py-1 mb-4 w-full"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {/* Filter Bar */}
+      <div className="mb-4 flex gap-2">
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-3 py-1 border ${
+            filter === "all" ? "bg-gray-50 text-gray-900" : ""
+          }`}
+        >
+          All
+        </button>
+
+        <button
+          onClick={() => setFilter("active")}
+          className={`px-3 py-1 border ${
+            filter === "active" ? "bg-gray-50 text-gray-900" : ""
+          }`}
+        >
+          Active
+        </button>
+
+        <button
+          onClick={() => setFilter("inactive")}
+          className={`px-3 py-1 border ${
+            filter === "inactive" ? "bg-gray-50 text-gray-900" : ""
+          }`}
+        >
+          Inactive
+        </button>
+      </div>
+
       <ProductTable
-        products={products}
+        products={filteredProducts}
         role={role}
         onEdit={handleEdit}
         onDelete={handleDelete}
