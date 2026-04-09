@@ -7,7 +7,7 @@ It enables authenticated users to manage products with role-based access control
 
 ## 🚀 Live Demo
 
-* URL: https://your-app.vercel.app
+[Open App](https://saas-dashboard-eight-swart.vercel.app)
 
 ---
 
